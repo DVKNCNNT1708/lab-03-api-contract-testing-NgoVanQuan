@@ -1,6 +1,14 @@
 ID,Folder,Endpoint,Method,Scenario,Input file/body,Expected status,Expected response check,Type,Pass/Fail,Evidence
-TC01,Functional,/health,GET,Service is alive,-,200,status=ok,functional,,
-TC02,Functional,/readings,POST,Create reading happy path,mock-data/sensor-reading-valid.json,201,"has reading_id, accepted=true",functional,,
-TC03,Negative,/readings,POST,Missing device_id,mock-data/sensor-reading-invalid-missing-device.json,400,Problem Details,negative,,
-TC04,Auth,/readings,POST,Missing token,mock-data/sensor-reading-valid.json,401,Problem Details,auth,,
-TC05,Boundary,/readings,POST,High temperature boundary,mock-data/sensor-reading-boundary.json,201/400,documented behavior,boundary,,
+TC01,00_Health,/health,GET,Service is alive,-,200,status=ok; service=iot-ingestion,functional,PASS,Newman report
+TC02,01_Functional,/readings,POST,Create reading happy path,mock-data/sensor-reading-valid.json,201,"has reading_id, device_id=ESP32-LAB-A01, metric=temperature, accepted=true",functional,PASS,Newman report
+TC03,01_Functional,/readings/latest,GET,Get latest readings with device filter,device_id=ESP32-LAB-A01&limit=5,200,items is array of readings,functional,PASS,Newman report
+TC04,02_Auth,/readings/latest,GET,Valid token is accepted,limit=1,200,returns readings array,auth,PASS,Newman report
+TC05,02_Auth,/readings,POST,Missing token is rejected (local only),mock-data/sensor-reading-valid.json,401,Problem Details structure,auth,CONDITIONAL,Newman report
+TC06,02_Auth,/readings,POST,Invalid token is rejected (local only),mock-data/sensor-reading-valid.json,401,Problem Details structure,auth,CONDITIONAL,Newman report
+TC07,03_Negative,/readings,POST,Missing device_id field,mock-data/sensor-reading-invalid-missing-device.json,400,Problem Details with status 400,negative,PASS,Newman report
+TC08,03_Negative,/readings,POST,Invalid metric enum value,body with metric=temp_hot,400,Problem Details with detail field,negative,PASS,Newman report
+TC09,04_Boundary_Reliability,/readings,POST,High temperature boundary (80),mock-data/sensor-reading-boundary.json,201,reading_id present; accepted=true,boundary,PASS,Newman report
+TC10,04_Boundary_Reliability,/readings,POST,Out-of-range temperature (81),body with value=81,400,Problem Details with status in 400-599,boundary,PASS,Newman report
+TC11,04_Boundary_Reliability,/readings/latest,GET,Limit parameter above max (101),limit=101,400,Problem Details response,boundary,PASS,Newman report
+TC12,05_Consumer_side_Smoke,/detect,POST,Consumer calls AI Vision mock,body with camera_id & image_url,200,"has detection_id, label, confidence in 0-1",smoke,PASS,Newman report
+TC13,06_Local_only_NonFunctional,/readings,POST,Response time threshold on local,mock-data/sensor-reading-valid.json,201,response time < 1000ms (local only),nonfunctional,CONDITIONAL,Newman report

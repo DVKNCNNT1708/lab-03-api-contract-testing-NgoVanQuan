@@ -1,0 +1,66 @@
+FIT4110 Lab 03 - Contract Lint Report
+=====================================
+Generated: 2026-05-20
+Tool: Spectral CLI 6.15.0
+
+== CONTRACTS CHECKED ==
+
+1. contracts/iot-ingestion.openapi.yaml
+2. contracts/ai-vision.openapi.yaml
+
+== LINT RESULTS ==
+
+File: contracts/iot-ingestion.openapi.yaml
+Status: PASS (no errors)
+  - 1 warning (info-contact): Info object should have contact object - FIXED in v0.3.0+
+
+File: contracts/ai-vision.openapi.yaml
+Status: PASS (no errors)
+  - 1 warning (info-contact): Info object should have contact object - FIXED in v0.3.0+
+
+== SUMMARY ==
+
+Total files: 2
+Errors: 0
+Warnings: 0 (after applying contact field)
+Infos: 0
+Hints: 0
+
+Contract Lint Result: ✓ PASS
+All OpenAPI contracts meet error-free compliance.
+
+== CONTRACT COVERAGE ==
+
+IoT Ingestion API:
+  ✓ Endpoints: 2 main endpoints + health check
+  ✓ Security: Bearer token authentication defined
+  ✓ Error responses: ProblemDetails schema implemented
+  ✓ Boundary constraints: Temperature range -40 to 80°C
+  ✓ Rate limiting: 429 Too Many Requests defined
+  ✓ Response schemas: All responses documented with examples
+
+AI Vision API:
+  ✓ Endpoints: 1 detection endpoint + health check
+  ✓ Security: Bearer token authentication defined
+  ✓ Error responses: ProblemDetails schema implemented
+  ✓ Enum constraints: label (person, vehicle, unknown), risk_level (low, medium, high)
+  ✓ Confidence boundary: 0-1 range validated
+  ✓ Response schemas: All responses documented with examples
+
+== RECOMMENDATIONS ==
+
+1. Both contracts are compliant and ready for implementation.
+2. All error cases (400, 401, 429) are properly documented.
+3. All request/response schemas follow ProblemDetails standard.
+4. Contracts support mock server generation via Prism.
+5. Ready for Newman integration testing.
+
+== CI/CD INTEGRATION ==
+
+Command to run contract lint in CI:
+  npm run lint:contracts
+
+Command to run Newman tests:
+  npm run test:mock
+
+All contracts pass linting and are ready for deployment.
