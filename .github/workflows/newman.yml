@@ -27,12 +27,27 @@ jobs:
 
       - name: Start Prism mock servers
         run: |
-          nohup npm run mock:iot > prism-iot.log 2>&1 &
-          nohup npm run mock:vision > prism-vision.log 2>&1 &
-          sleep 2
+          npm run mock:all > prism.log 2>&1 &
+          echo "Waiting 5 seconds for servers to start..."
+          sleep 5
+          echo "Server startup complete, attempting connection..."
+
+      - name: Check server connectivity
+        run: |
+          echo "=== Checking IoT server ==="
+          curl -v http://localhost:4010/health || echo "IoT server not responding"
+          echo ""
+          echo "=== Checking Vision server ==="
+          curl -v http://localhost:4011/health || echo "Vision server not responding"
+          echo ""
+          echo "=== Process list ==="
+          ps aux | grep prism || echo "No prism processes found"
+          echo ""
+          echo "=== Listening ports ==="
+          netstat -tlnp 2>/dev/null | grep -E '401[01]|LISTEN' || true
 
       - name: Wait for mock servers
-        run: npx wait-on http://localhost:4010/health http://localhost:4011/health --timeout 60000 --interval 500
+        run: npx wait-on http://localhost:4010/health http://localhost:4011/health --timeout 90000 --interval 1000 --verbose
 
       - name: Run Newman contract tests
         run: npm run test:mock
@@ -40,8 +55,11 @@ jobs:
       - name: Show Prism logs on failure
         if: failure()
         run: |
-          cat prism-iot.log || true
-          cat prism-vision.log || true
+          echo "=== Prism Server Logs ==="
+          cat prism.log || true
+          echo ""
+          echo "=== Full Process Info ==="
+          ps aux || true
 
       - name: Upload Newman reports
         if: always()
